@@ -1,15 +1,21 @@
+// storage za vjezbu
 let data = {
-  user: {
+  users: {
     data: [
       {
-        full_name: 'Kaja Radošević',
+        username: 'KajaRado7',
         email: 'kajarado@gmail.com',
         password: '123456kaja',
       },
       {
-        full_name: 'Ivan Horvat',
+        username: 'Ivan_xd',
         email: 'ivanhorvat@gmail.com',
         password: '123456ivan',
+      },
+      {
+        username: 'Maja1996',
+        email: 'majamajic@gmail.com',
+        password: '123456maja',
       },
     ],
   },
