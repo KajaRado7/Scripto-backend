@@ -1,12 +1,26 @@
 import express from 'express';
 import cors from 'cors';
 import data from './storage.js';
+import connect from './db.js';
 
 const app = express(); // instanciranje aplikacije
-const port = 3000; // port na kojem će web server slušati
+const port = process.env.PORT || 3000; // port na kojem će web server slušati
 
 app.use(cors());
 app.use(express.json());
+
+// postanje skripti
+app.post('/scripts', async (req, res) => {
+  let data = req.body;
+  let db = await connect();
+  let result = await db.collection('scripts').insert(data);
+
+  if (result && result.insertedCount == 1) {
+    res.json({ result, status: 'ok' });
+  } else {
+    res.json({ status: 'fail' });
+  }
+});
 
 // dohvat podataka sa storage.js(vjezba)
 app.get('/users', (req, res) => {
@@ -21,9 +35,6 @@ app.get('/', (req, res) => {
 });
 // Script
 app.get('/scripts', (req, res) => {
-  res.json({});
-});
-app.post('/scripts', (req, res) => {
   res.json({});
 });
 // My Account
