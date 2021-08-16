@@ -20,7 +20,7 @@ export default () => {
       if (err) {
         reject('Doslo je do greske ' + err);
       } else {
-        console.log('Uspijesno spajanje na bazu');
+        console.log('Uspijesno spajanje na bazu!!!');
         db = client.db('scripto');
         resolve(db);
       }
