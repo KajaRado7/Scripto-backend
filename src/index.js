@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config(); // čita .env datoteku
+
 import express from 'express';
 import cors from 'cors';
 import data from './storage.js';
@@ -11,6 +14,24 @@ const port = process.env.PORT || 3000; // port na kojem će web server slušati
 app.use(cors());
 app.use(express.json());
 
+// provjera valjanosti JWT potpisa
+app.get('/secret', [auth.verify], (req, res) => {
+  res.json({ message: 'This is the secret: ' + req.jwt.username });
+});
+
+// prijava korisnika
+app.post('/auth', async (req, res) => {
+  let user = req.body;
+  try {
+    let result = await auth.authenticateUser(user.username, user.password);
+    res.json(result);
+  } catch (e) {
+    // problem sa autentifikacijom
+    res.status(403).json({ error: e.message });
+  }
+});
+
+// registracija korisnika
 app.post('/users', async (req, res) => {
   let user = req.body;
   let id;
