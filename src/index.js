@@ -46,7 +46,7 @@ app.post('/users', async (req, res) => {
 });
 
 // postanje skripti
-app.post('/scripts', async (req, res) => {
+app.post('/scripts', [auth.verify], async (req, res) => {
   let data = req.body;
   let db = await connect();
   let result = await db.collection('scripts').insert(data);
