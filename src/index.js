@@ -27,7 +27,7 @@ app.post('/auth', async (req, res) => {
     res.json(result);
   } catch (e) {
     // problem sa autentifikacijom
-    res.status(403).json({ error: e.message });
+    res.status(500).json({ error: e.message });
   }
 });
 
