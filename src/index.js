@@ -30,6 +30,27 @@ app.post('/auth', async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+// promijena password-a(sa middleware-om za provjeru ulogiranosti korisnika)
+app.patch('/users', [auth.verify], async (req, res) => {
+  let changes = req.body;
+  let username = req.jwt.username;
+
+  if (changes.new_password && changes.old_password) {
+    let result = await auth.changeUserPassword(
+      username,
+      changes.new_password,
+      changes.old_password
+    );
+    if (result) {
+      res.status(201).send();
+    } else {
+      res.status(500).json({ error: 'Cannot change your password!' });
+    }
+  } else {
+    // ako korisnik nije poslao dobar upit sa front-a
+    res.status(400).json({ error: 'Invalid inquiry!' });
+  }
+});
 
 // registracija korisnika
 app.post('/users', async (req, res) => {
@@ -45,7 +66,7 @@ app.post('/users', async (req, res) => {
   res.json({ id: id });
 });
 
-// postanje skripti
+// postanje skripti(sa middleware-om za provjeru ulogiranosti korisnika)
 app.post('/scripts', [auth.verify], async (req, res) => {
   let data = req.body;
   let db = await connect();

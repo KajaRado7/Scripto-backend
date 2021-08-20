@@ -36,6 +36,7 @@ export default {
   // PRIJAVA-----------------------------------------------------------------//
   async authenticateUser(username, password) {
     let db = await connect();
+    // postoji li korisnik?
     let user = await db.collection('users').findOne({ username: username });
 
     // provjera da li se podudaraju pass sa front-a i pass u bazi(koji je kriptiran)
@@ -77,6 +78,30 @@ export default {
       }
     } catch (e) {
       return res.status(401).send();
+    }
+  },
+  // PROMIJENA PASS-A
+  async changeUserPassword(username, old_password, new_password) {
+    let db = await connect();
+    // postoji li korisnik?
+    let user = await db.collection('users').findOne({ username: username });
+    // provjera da li je uneseni stari pass isti kao pass u bazi
+    if (
+      user &&
+      user.password &&
+      (await bcrypt.compare(old_password, user.password))
+    ) {
+      let new_password_hashed = await bcrypt.hash(new_password, 8);
+      let result = await db.collection('users').updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            password: new_password_hashed,
+          },
+        }
+      );
+      // vraca true ako je promijenjen 1 zapis
+      return result.modifiedCount == 1;
     }
   },
 };
