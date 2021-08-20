@@ -34,13 +34,15 @@ app.post('/auth', async (req, res) => {
 app.patch('/users', [auth.verify], async (req, res) => {
   let changes = req.body;
   let username = req.jwt.username;
+  //console.log(changes.new_password);
 
   if (changes.new_password && changes.old_password) {
     let result = await auth.changeUserPassword(
       username,
-      changes.new_password,
-      changes.old_password
+      changes.old_password,
+      changes.new_password
     );
+
     if (result) {
       res.status(201).send();
     } else {
