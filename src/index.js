@@ -67,6 +67,14 @@ app.post('/users', async (req, res) => {
   }
   res.json({ id: id });
 });
+app.get('/users/:username', async (req, res) => {
+  let username = req.params.username;
+  let db = await connect();
+
+  let doc = await db.collection('users').findOne({ username: username });
+
+  res.json(doc);
+});
 
 // postanje skripti(sa middleware-om za provjeru ulogiranosti korisnika)
 app.post('/scripts', [auth.verify], async (req, res) => {
