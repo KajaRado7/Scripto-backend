@@ -30,6 +30,8 @@ app.post('/auth', async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
+//USERS--------------------------------------------------------------------------------//
 // promijena password-a(sa middleware-om za provjeru ulogiranosti korisnika)
 app.patch('/users', [auth.verify], async (req, res) => {
   let changes = req.body;
@@ -67,6 +69,7 @@ app.post('/users', async (req, res) => {
   }
   res.json({ id: id });
 });
+// dohvat kor.imena korisnika
 app.get('/users/:username', async (req, res) => {
   let username = req.params.username;
   let db = await connect();
@@ -75,9 +78,9 @@ app.get('/users/:username', async (req, res) => {
 
   res.json(doc);
 });
-
-// postanje skripti(sa middleware-om za provjeru ulogiranosti korisnika)
-app.post('/scripts', [auth.verify], async (req, res) => {
+//SCRIPTS-----------------------------------------------------------------------------//
+// postanje skripti
+app.post('/scripts', async (req, res) => {
   let data = req.body;
   let db = await connect();
   let result = await db.collection('scripts').insert(data);
@@ -87,6 +90,14 @@ app.post('/scripts', [auth.verify], async (req, res) => {
   } else {
     res.json({ status: 'fail' });
   }
+});
+// dohvat id-a za zasebnu skriptu
+app.get('/scripts/:id', [auth.verify], async (req, res) => {
+  let id = req.params.id;
+  let db = await connect();
+
+  let doc = await db.collection('scripts').findOne({ _id: mongo.ObjectId(id) });
+  res.json(doc);
 });
 
 /*
