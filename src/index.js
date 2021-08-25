@@ -99,6 +99,40 @@ app.get('/scripts/:id', [auth.verify], async (req, res) => {
   let doc = await db.collection('scripts').findOne({ _id: mongo.ObjectId(id) });
   res.json(doc);
 });
+// pretraga skripti
+app.get('/scripts', async (req, res) => {
+  let db = await connect();
+  let query = req.query;
+  let selekcija = {};
+
+  if (query._any) {
+    // kompozitni upiti
+    let pretraga = query._any;
+    let terms = pretraga.split(' ');
+    let atributi = ['script_name']; // po cemu cemo vrsiti pretragu
+
+    selekcija = {
+      $and: [],
+    };
+
+    terms.forEach((term) => {
+      let or = {
+        $or: [],
+      };
+      atributi.forEach((atribut) => {
+        or.$or.push({ [atribut]: new RegExp(term) }); // [] iščitava što je u atributu
+      });
+      selekcija.$and.push(or);
+    });
+  }
+
+  console.log('Selekcija: ', selekcija);
+
+  let cursor = await db.collection('scripts').find(selekcija);
+  let results = await cursor.toArray();
+
+  res.json(results);
+});
 
 /*
 
