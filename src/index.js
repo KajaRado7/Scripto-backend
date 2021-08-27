@@ -3,7 +3,6 @@ dotenv.config(); // čita .env datoteku
 
 import express from 'express';
 import cors from 'cors';
-import data from './storage.js';
 import connect from './db.js';
 import auth from './auth.js';
 import mongo from 'mongodb';
@@ -109,7 +108,7 @@ app.get('/scripts', async (req, res) => {
     // kompozitni upiti
     let pretraga = query._any;
     let terms = pretraga.split(' ');
-    let atributi = ['script_name']; // po cemu cemo vrsiti pretragu
+    let atributi = ['script_name', 'study', 'script_rating']; // po cemu cemo vrsiti pretragu
 
     selekcija = {
       $and: [],
@@ -133,34 +132,54 @@ app.get('/scripts', async (req, res) => {
 
   res.json(results);
 });
+//COMMENTS----------------------------------------------------------------------------//
+//objava
+app.post('/scripts/:scriptId/comments', async (req, res) => {
+  let db = await connect();
+  let doc = req.body;
+  let scriptId = req.params.scriptId;
+
+  doc._id = mongo.ObjectId();
+
+  let result = await db.collection('scripts').updateOne(
+    { _id: mongo.ObjectId(scriptId) },
+    {
+      $push: { comments: doc },
+    }
+  );
+  if (result.modifiedCount == 1) {
+    res.json({
+      status: 'success',
+      id: doc._id,
+    });
+  } else {
+    res.status(500).json({
+      status: 'fail',
+    });
+  }
+});
+//brisanje
+app.delete('/scripts/:scriptId/comments/:commentId', async (req, res) => {
+  let db = await connect();
+  let scriptId = req.params.scriptId;
+  let commentId = req.params.commentId;
+
+  let result = await db.collection('scripts').updateOne(
+    { _id: mongo.ObjectId(scriptId) },
+    {
+      $pull: { comments: { _id: mongo.ObjectId(commentId) } },
+    }
+  );
+  if (result.modifiedCount == 1) {
+    res.status(201).send();
+  } else {
+    res.status(500).json({
+      status: 'fail',
+    });
+  }
+});
 
 /*
-
-Home
-app.get('/', (req, res) => {
-  res.json('Welcome to Home page! :)');
-});
-
-Script
-app.get('/scripts', (req, res) => {
-  res.json({});
-});
-
-My Account
-app.get('/users/:id', (req, res) => {
-  res.json({});
-});
-
-Login/Sign up ?
-app.post('/users/:id', (req, res) => {
-  res.json({});
-});
-
-Add Script
-app.post('/add_script', (req, res) => {
-  res.json({});
-});
-
 My Downloads
 app.get('/my_downloads', (req, res) => {
   res.json({});
