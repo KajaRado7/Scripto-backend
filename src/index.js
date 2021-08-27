@@ -108,7 +108,7 @@ app.get('/scripts', async (req, res) => {
     // kompozitni upiti
     let pretraga = query._any;
     let terms = pretraga.split(' ');
-    let atributi = ['script_name', 'study', 'script_rating']; // po cemu cemo vrsiti pretragu
+    let atributi = ['script_name', 'study', 'university', 'script_rating']; // po cemu cemo vrsiti pretragu
 
     selekcija = {
       $and: [],
