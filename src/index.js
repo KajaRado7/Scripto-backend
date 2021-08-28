@@ -178,13 +178,50 @@ app.delete('/scripts/:scriptId/comments/:commentId', async (req, res) => {
     });
   }
 });
+//DOWNLOADS-----------------------------------------------------------------------------//
+// dodavanje skripte u kolekciju
+app.post('/my_downloads', async (req, res) => {
+  let data = req.body;
 
-/*
-My Downloads
-app.get('/my_downloads', (req, res) => {
-  res.json({});
+  delete data._id;
+
+  let db = await connect();
+  let result = await db.collection('myDownloads').insertOne(data);
+
+  if (result && result.insertedCount == 1) {
+    res.json({ result, status: 'ok' });
+  } else {
+    res.json({
+      status: 'fail',
+    });
+  }
 });
-*/
+app.get('/my_downloads', async (req, res) => {
+  let db = await connect();
+
+  let cursor = await db.collection('myDownloads').find();
+  let results = await cursor.toArray();
+  res.json(results);
+});
+
+app.get('/my_downloads/:scriptId', [auth.verify], async (req, res) => {
+  let db = await connect();
+  let scriptId = req.params.script_id;
+
+  let results = await db
+    .collection('myDownloads')
+    .findOne({ script_id: scriptId });
+  res.json(results);
+});
+
+/*app.get('/my_downloads/:username', [auth.verify], async (req, res) => {
+  let db = await connect();
+  let username = req.params.username;
+
+  let cursor = await db.collection('myDownloads').find({ username: username });
+  let results = await cursor.toArray();
+  res.json(results);
+});*/
 
 app.listen(port, () =>
   console.log(`\n\n[DONE] Backend se vrti na http://localhost:${port}/\n\n`)
