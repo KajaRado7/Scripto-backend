@@ -133,47 +133,43 @@ app.get('/scripts', async (req, res) => {
   res.json(results);
 });
 //COMMENTS----------------------------------------------------------------------------//
-//objava
-app.post('/scripts/:scriptId/comments', async (req, res) => {
+app.get('/comments/:script_id', [auth.verify], async (req, res) => {
   let db = await connect();
-  let doc = req.body;
-  let scriptId = req.params.scriptId;
+  let scriptId = req.params.script_id;
 
-  doc._id = mongo.ObjectId();
+  let result = await db.collection('comments').find({ script_id: scriptId });
+  let cursor = await result.toArray();
+  res.json(cursor);
+});
 
-  let result = await db.collection('scripts').updateOne(
-    { _id: mongo.ObjectId(scriptId) },
-    {
-      $push: { comments: doc },
-    }
-  );
-  if (result.modifiedCount == 1) {
-    res.json({
-      status: 'success',
-      id: doc._id,
-    });
+app.post('/comments', [auth.verify], async (req, res) => {
+  let data = req.body;
+
+  delete data._id;
+
+  let db = await connect();
+  let result = await db.collection('comments').insertOne(data);
+
+  if (result && result.insertedCount == 1) {
+    res.json(result.ops[0]);
   } else {
-    res.status(500).json({
+    res.json({
       status: 'fail',
     });
   }
 });
-//brisanje
-app.delete('/scripts/:scriptId/comments/:commentId', async (req, res) => {
-  let db = await connect();
-  let scriptId = req.params.scriptId;
-  let commentId = req.params.commentId;
 
-  let result = await db.collection('scripts').updateOne(
-    { _id: mongo.ObjectId(scriptId) },
-    {
-      $pull: { comments: { _id: mongo.ObjectId(commentId) } },
-    }
-  );
-  if (result.modifiedCount == 1) {
-    res.status(201).send();
+app.post('/comments/delete/:comment', [auth.verify], async (req, res) => {
+  let cName = req.params.comment;
+  console.log(cName);
+
+  let db = await connect();
+  let result = await db.collection('comments').deleteOne({ comment: cName });
+
+  if (result && result.deletedCount == 1) {
+    res.json(result);
   } else {
-    res.status(500).json({
+    res.json({
       status: 'fail',
     });
   }
@@ -214,14 +210,14 @@ app.get('/my_downloads/:scriptId', [auth.verify], async (req, res) => {
   res.json(results);
 });
 
-/*app.get('/my_downloads/:username', [auth.verify], async (req, res) => {
+app.get('/my_downloads/:username', [auth.verify], async (req, res) => {
   let db = await connect();
   let username = req.params.username;
 
   let cursor = await db.collection('myDownloads').find({ username: username });
   let results = await cursor.toArray();
   res.json(results);
-});*/
+});
 
 app.listen(port, () =>
   console.log(`\n\n[DONE] Backend se vrti na http://localhost:${port}/\n\n`)
