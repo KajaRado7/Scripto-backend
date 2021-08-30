@@ -25,11 +25,11 @@ app.post('/auth', async (req, res) => {
     let result = await auth.authenticateUser(user.username, user.password);
     res.json(result);
   } catch (e) {
+    console.log(e);
     // problem sa autentifikacijom
     res.status(500).json({ error: e.message });
   }
 });
-
 //USERS--------------------------------------------------------------------------------//
 // promijena password-a(sa middleware-om za provjeru ulogiranosti korisnika)
 app.patch('/users', [auth.verify], async (req, res) => {
@@ -54,7 +54,6 @@ app.patch('/users', [auth.verify], async (req, res) => {
     res.status(400).json({ error: 'Invalid inquiry!' });
   }
 });
-
 // registracija korisnika
 app.post('/users', async (req, res) => {
   let user = req.body;
@@ -133,6 +132,7 @@ app.get('/scripts', async (req, res) => {
   res.json(results);
 });
 //COMMENTS----------------------------------------------------------------------------//
+//dohvat komentara za svaku skriptu
 app.get('/comments/:script_id', [auth.verify], async (req, res) => {
   let db = await connect();
   let scriptId = req.params.script_id;
@@ -141,7 +141,7 @@ app.get('/comments/:script_id', [auth.verify], async (req, res) => {
   let cursor = await result.toArray();
   res.json(cursor);
 });
-
+// objava komentara
 app.post('/comments', [auth.verify], async (req, res) => {
   let data = req.body;
 
@@ -158,7 +158,7 @@ app.post('/comments', [auth.verify], async (req, res) => {
     });
   }
 });
-
+// brisanje komentara
 app.post('/comments/delete/:comment', [auth.verify], async (req, res) => {
   let cName = req.params.comment;
   console.log(cName);
@@ -206,7 +206,7 @@ app.get('/my_downloads/:scriptId', [auth.verify], async (req, res) => {
 
   let results = await db
     .collection('myDownloads')
-    .find({ script_id: script_id });
+    .findOne({ script_id: script_id });
   res.json(results);
 });
 
