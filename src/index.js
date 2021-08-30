@@ -202,11 +202,11 @@ app.get('/my_downloads', async (req, res) => {
 
 app.get('/my_downloads/:scriptId', [auth.verify], async (req, res) => {
   let db = await connect();
-  let scriptId = req.params.script_id;
+  let script_id = req.params.script_id;
 
   let results = await db
     .collection('myDownloads')
-    .findOne({ script_id: scriptId });
+    .find({ script_id: script_id });
   res.json(results);
 });
 
@@ -218,6 +218,28 @@ app.get('/my_downloads/:username', [auth.verify], async (req, res) => {
   let results = await cursor.toArray();
   res.json(results);
 });
+
+app.post(
+  '/my_downloads/delete/:script_name',
+  [auth.verify],
+  async (req, res) => {
+    let script_name = req.params.script_name;
+    console.log(script_name);
+
+    let db = await connect();
+    let result = await db
+      .collection('myDownloads')
+      .deleteOne({ script_name: script_name });
+
+    if (result && result.deletedCount == 1) {
+      res.json({ result, status: 'ok' });
+    } else {
+      res.json({
+        status: 'fail',
+      });
+    }
+  }
+);
 
 app.listen(port, () =>
   console.log(`\n\n[DONE] Backend se vrti na http://localhost:${port}/\n\n`)
